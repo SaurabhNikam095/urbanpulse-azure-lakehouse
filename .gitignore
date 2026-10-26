@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Secrets and local config (never commit)
+.env
+*.pem
+*.key
+
+# Terraform (state can contain secrets)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+!.terraform.lock.hcl
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+# Spark / Delta / local data
+spark-warehouse/
+metastore_db/
+derby.log
+checkpoints/
+data/
+*.parquet
+*.avro
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
