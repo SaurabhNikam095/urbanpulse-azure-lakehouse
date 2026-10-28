@@ -1,0 +1,24 @@
+{
+  "type": "record",
+  "name": "TripEvent",
+  "namespace": "com.urbanpulse.trips",
+  "doc": "trips.v2: v1 plus surge_multiplier. Backward compatible: a v2 reader reads v1 data with surge_multiplier = 1.0.",
+  "fields": [
+    {"name": "trip_id", "type": "string"},
+    {"name": "event_type", "type": {
+      "type": "enum",
+      "name": "TripEventType",
+      "symbols": ["requested", "accepted", "started", "completed", "cancelled"]
+    }},
+    {"name": "rider_id", "type": "string"},
+    {"name": "driver_id", "type": ["null", "string"], "default": null},
+    {"name": "pickup_lat", "type": "double"},
+    {"name": "pickup_lng", "type": "double"},
+    {"name": "drop_lat", "type": "double"},
+    {"name": "drop_lng", "type": "double"},
+    {"name": "fare", "type": ["null", "double"], "default": null},
+    {"name": "event_ts", "type": "string", "doc": "ISO 8601 timestamp text"},
+    {"name": "surge_multiplier", "type": ["double", "null"], "default": 1.0,
+     "doc": "Added in v2. Defaults to 1.0 (no surge) when absent."}
+  ]
+}

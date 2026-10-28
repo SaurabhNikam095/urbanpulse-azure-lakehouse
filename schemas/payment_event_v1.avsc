@@ -1,0 +1,24 @@
+{
+  "type": "record",
+  "name": "PaymentEvent",
+  "namespace": "com.urbanpulse.payments",
+  "doc": "One payment attempt for a completed trip (payments.v1). phone is synthetic PII.",
+  "fields": [
+    {"name": "payment_id", "type": "string"},
+    {"name": "trip_id", "type": "string"},
+    {"name": "rider_id", "type": "string"},
+    {"name": "method", "type": {
+      "type": "enum",
+      "name": "PaymentMethod",
+      "symbols": ["UPI", "CARD", "CASH", "WALLET"]
+    }},
+    {"name": "amount", "type": "double"},
+    {"name": "status", "type": {
+      "type": "enum",
+      "name": "PaymentStatus",
+      "symbols": ["SUCCESS", "FAILED"]
+    }},
+    {"name": "phone", "type": "string"},
+    {"name": "event_ts", "type": "string", "doc": "ISO 8601 timestamp text"}
+  ]
+}

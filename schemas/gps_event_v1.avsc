@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "GPSEvent",
+  "namespace": "com.urbanpulse.gps",
+  "doc": "One GPS ping from a driver (gps.v1).",
+  "fields": [
+    {"name": "driver_id", "type": "string"},
+    {"name": "lat", "type": "double"},
+    {"name": "lng", "type": "double"},
+    {"name": "speed_kmph", "type": "double"},
+    {"name": "status", "type": {
+      "type": "enum",
+      "name": "DriverStatus",
+      "symbols": ["idle", "busy"]
+    }},
+    {"name": "event_ts", "type": "string", "doc": "ISO 8601 timestamp text"}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "TripEvent",
+  "namespace": "com.urbanpulse.trips",
+  "doc": "One event in the lifecycle of a trip (trips.v1).",
+  "fields": [
+    {"name": "trip_id", "type": "string"},
+    {"name": "event_type", "type": {
+      "type": "enum",
+      "name": "TripEventType",
+      "symbols": ["requested", "accepted", "started", "completed", "cancelled"]
+    }},
+    {"name": "rider_id", "type": "string"},
+    {"name": "driver_id", "type": ["null", "string"], "default": null},
+    {"name": "pickup_lat", "type": "double"},
+    {"name": "pickup_lng", "type": "double"},
+    {"name": "drop_lat", "type": "double"},
+    {"name": "drop_lng", "type": "double"},
+    {"name": "fare", "type": ["null", "double"], "default": null},
+    {"name": "event_ts", "type": "string", "doc": "ISO 8601 timestamp text"}
+  ]
+}
