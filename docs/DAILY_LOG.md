@@ -19,4 +19,9 @@
 **Broke:** Downloaded files again had no final newline, so ruff format flagged them; fixed with ruff format.
 **Learned:** Fault injection with a manifest to prove pipeline quality later; seeded generators make random rates testable; .gitattributes keeps line endings consistent.
 **Evidence:** simulators/chaos.py and tests/test_chaos.py (46 passed).
-**Next:** Avro data contracts (trips v1 and v2, gps, payments) and a local schema validation script.
+
+## Day 4 - 28 Oct 2026
+**Built:** Avro data contracts in schemas/ (trips v1 and v2 with a nullable surge_multiplier defaulting to 1.0, gps v1, payments v1), a validation script (scripts/validate_schemas.py) that checks the schemas parse, v2 reads v1 data and simulator output matches the schemas, and a GitHub Actions CI workflow that runs ruff, pytest and the schema checks.
+**Broke:** One command failed locally and passed on re-run; repeated the test run to check for a flaky test.
+**Learned:** Adding a field with a default keeps old and new data compatible; negative tests prove bad records are rejected; CI verifies every push outside my laptop.
+**Evidence:** docs/evidence/day-04/01-github-actions-ci-green.png (CI #1 green, commit f6e4983).
