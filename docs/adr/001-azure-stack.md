@@ -59,7 +59,7 @@ Without rerouting, three CDC tables would use 10 of 10 and leave no spare.
 
 - Spark engine: Azure Databricks vs Fabric or Synapse (decide by Day 7)
 - Orchestration: Data Factory plus Databricks Workflows vs Airflow (decide by Day 7)
-- Late-data policy: drop, log or store (decide by Day 5)
+- Late-data policy: decided in ADR-002 (store late events, 300 seconds allowed lateness)
 - Exact prices from the Azure pricing calculator **[TO CONFIRM]**
 - VM size and vCPU quota in Central India, checked before the first Terraform apply
 

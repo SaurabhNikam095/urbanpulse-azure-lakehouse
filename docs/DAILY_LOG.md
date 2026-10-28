@@ -25,3 +25,9 @@
 **Broke:** One command failed locally and passed on re-run; repeated the test run to check for a flaky test.
 **Learned:** Adding a field with a default keeps old and new data compatible; negative tests prove bad records are rejected; CI verifies every push outside my laptop.
 **Evidence:** docs/evidence/day-04/01-github-actions-ci-green.png (CI #1 green, commit f6e4983).
+
+## Day 5 - 28 Oct 2026
+**Built:** Bronze parser (ingestion/bronze.py) with Avro schema checks plus value-range rules, ingestion metadata on good records and quarantine with a reason for bad ones; Silver logic (ingestion/silver.py) with dedupe on natural keys, a 300 second watermark and a late_arrivals table; ADR-002 for the late-data policy; 43 new tests, 99 in total.
+**Broke:** A new file created in VS Code came with a folder of the same name; checked the layout with Get-ChildItem before committing.
+**Learned:** Counting every input record into exactly one output (silver, late or duplicate) proves nothing is lost; schema checks and business-rule checks catch different bad records; a watermark decides what counts as too late.
+**Evidence:** docs/adr/002-late-data-policy.md, tests/test_bronze.py and tests/test_silver.py (99 passed).
