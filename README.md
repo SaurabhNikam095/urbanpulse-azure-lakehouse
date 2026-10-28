@@ -1,4 +1,5 @@
 # UrbanPulse on Azure
+![CI](https://github.com/SaurabhNikam095/urbanpulse-azure-lakehouse/actions/workflows/ci.yml/badge.svg)
 
 Real-time and batch lakehouse platform for ride-hailing analytics, simulated for Pune.
 
