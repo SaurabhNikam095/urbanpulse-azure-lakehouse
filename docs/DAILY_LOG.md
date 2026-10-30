@@ -31,3 +31,15 @@
 **Broke:** A new file created in VS Code came with a folder of the same name; checked the layout with Get-ChildItem before committing.
 **Learned:** Counting every input record into exactly one output (silver, late or duplicate) proves nothing is lost; schema checks and business-rule checks catch different bad records; a watermark decides what counts as too late.
 **Evidence:** docs/adr/002-late-data-policy.md, tests/test_bronze.py and tests/test_silver.py (99 passed), docs/evidence/day-05/01-github-actions-ci-green (2).png (CI green).
+
+## Day 6 - 31 Oct 2026
+**Built:** PII hashing (ingestion/pii.py) using HMAC-SHA256 with a salt read from an environment variable, and SCD Type 2 logic (ingestion/scd2.py) for drivers and riders from Debezium-style CDC events; phone and email are hashed before they enter the dimension rows and row_hash is computed over the hashed values; a 13-event sample CDC file; 30 new tests, 129 in total.
+**Broke:** CI failed on the first scd2 push because the sample CDC file had never been committed; the staged copy was stale after a hook edit, so I re-staged the file, committed it and CI went green.
+**Learned:** Pseudonymization keeps joins working because the same input and salt give the same hash; updated_at is left out of row_hash so a no-change update is ignored; rebuilding each key's timeline makes duplicate and out-of-order events safe.
+**Evidence:** tests/test_pii.py and tests/test_scd2.py (129 passed), CI #8 green (commit 60f429a).
+
+## Day 7 - 31 Oct 2026
+**Built:** ADR-003 (Azure Databricks as the Spark engine) and ADR-004 (Azure Data Factory for orchestration), closing the two open items in ADR-001; Terraform modules for the resource group, ADLS Gen2, Key Vault and Event Hubs (Standard, 2 throughput units) with a root configuration, written and validated only, with no apply.
+**Broke:** A multi-line PowerShell command pasted without its first line left the terminal waiting at the continuation prompt, and the first ADR file had never been saved, so the rename failed; cancelled with Ctrl+C and created both ADR files again with the right names.
+**Learned:** An ADR records a decision and its trade-offs; terraform validate checks a configuration without creating anything in Azure; the lock file pins the provider version for everyone, including CI.
+**Evidence:** docs/adr/003-spark-engine.md, docs/adr/004-orchestration.md, infra/terraform/, docs/evidence/day-07/01-github-actions-ci-green.png (CI #11 green, commit 0e7d8e1).
