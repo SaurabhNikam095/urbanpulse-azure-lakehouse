@@ -1,6 +1,6 @@
 # ADR-001: Azure messaging tier, CDC approach and region
 
-- **Status:** Accepted (messaging, CDC and region). Spark engine and orchestration are still open, see "Still open".
+- **Status:** Accepted (messaging, CDC, region, Spark engine and orchestration). Spark engine is decided in ADR-003 and orchestration in ADR-004.
 - **Date:** 27 October 2026
 - **Author:** Saurabh Nikam
 - **Project:** UrbanPulse on Azure
@@ -57,8 +57,8 @@ Without rerouting, three CDC tables would use 10 of 10 and leave no spare.
 
 ## Still open
 
-- Spark engine: Azure Databricks vs Fabric or Synapse (decide by Day 7)
-- Orchestration: Data Factory plus Databricks Workflows vs Airflow (decide by Day 7)
+- Spark engine: decided in ADR-003 (Azure Databricks)
+- Orchestration: decided in ADR-004 (Azure Data Factory, calling Databricks jobs)
 - Late-data policy: decided in ADR-002 (store late events, 300 seconds allowed lateness)
 - Exact prices from the Azure pricing calculator **[TO CONFIRM]**
 - VM size and vCPU quota in Central India, checked before the first Terraform apply
