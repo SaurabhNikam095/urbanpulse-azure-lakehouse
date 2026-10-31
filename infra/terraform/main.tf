@@ -3,6 +3,8 @@ locals {
 
   tags = {
     project     = var.project
+    owner       = "saurabhnikam095"
+    phase       = "baseline"
     environment = var.environment
     managed_by  = "terraform"
   }
