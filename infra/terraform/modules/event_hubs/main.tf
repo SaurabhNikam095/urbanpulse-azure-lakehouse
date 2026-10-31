@@ -14,3 +14,10 @@ resource "azurerm_eventhub" "topics" {
   partition_count   = each.value.partition_count
   message_retention = each.value.message_retention
 }
+
+resource "azurerm_eventhub_namespace_schema_group" "this" {
+  name                 = "urbanpulse"
+  namespace_id         = azurerm_eventhub_namespace.this.id
+  schema_compatibility = "Backward"
+  schema_type          = "Avro"
+}
