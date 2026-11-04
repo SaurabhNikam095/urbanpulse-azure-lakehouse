@@ -40,3 +40,13 @@ module "event_hubs" {
   location            = module.resource_group.location
   tags                = local.tags
 }
+
+module "databricks" {
+  source                = "./modules/databricks"
+  workspace_name        = "dbw-${local.base}-${var.name_suffix}"
+  access_connector_name = "dbac-${local.base}-${var.name_suffix}"
+  resource_group_name   = module.resource_group.name
+  location              = module.resource_group.location
+  storage_account_id    = module.adls.storage_account_id
+  tags                  = merge(local.tags, { phase = "streaming-bronze" })
+}
