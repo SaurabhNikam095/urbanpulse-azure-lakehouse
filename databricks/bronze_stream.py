@@ -37,6 +37,8 @@ raw = (
     .option("subscribe", TOPICS)
     .option("startingOffsets", "earliest")
     .option("includeHeaders", "true")
+    .option("includeHeaders", "true")
+    .option("maxOffsetsPerTrigger", 100)
     .load()
 )
 
