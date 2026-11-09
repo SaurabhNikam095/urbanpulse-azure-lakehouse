@@ -28,11 +28,12 @@ variable "event_hubs" {
     partition_count   = number
     message_retention = number
   }))
-  default = {
+    default = {
     trips         = { partition_count = 4, message_retention = 1 }
     gps           = { partition_count = 4, message_retention = 1 }
     payments      = { partition_count = 2, message_retention = 1 }
     "dead-letter" = { partition_count = 2, message_retention = 1 }
+    cdc           = { partition_count = 2, message_retention = 1 }
   }
 }
 
