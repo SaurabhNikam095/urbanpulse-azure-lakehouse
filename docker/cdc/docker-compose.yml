@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: urbanpulse-pg
+    environment:
+      POSTGRES_USER: upadmin
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?set PG_PASSWORD first}
+      POSTGRES_DB: urbanpulse
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=4
+      - -c
+      - max_wal_senders=4
+      - -c
+      - shared_buffers=128MB
+    ports:
+      - "127.0.0.1:5432:5432"
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U upadmin -d urbanpulse"]
+      interval: 5s
+      retries: 12
