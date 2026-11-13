@@ -23,3 +23,36 @@ services:
       test: ["CMD-SHELL", "pg_isready -U upadmin -d urbanpulse"]
       interval: 5s
       retries: 12
+
+  connect:
+    image: quay.io/debezium/connect:3.2
+    container_name: urbanpulse-connect
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8083:8083"
+    mem_limit: 1536m
+    environment:
+      BOOTSTRAP_SERVERS: evhns-urbanpulse-dev-sn095.servicebus.windows.net:9093
+      GROUP_ID: urbanpulse-connect
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      CONFIG_STORAGE_REPLICATION_FACTOR: "1"
+      OFFSET_STORAGE_REPLICATION_FACTOR: "1"
+      STATUS_STORAGE_REPLICATION_FACTOR: "1"
+      CONNECT_OFFSET_STORAGE_PARTITIONS: "2"
+      CONNECT_STATUS_STORAGE_PARTITIONS: "1"
+      KAFKA_HEAP_OPTS: "-Xms512m -Xmx1g"
+      PG_PASSWORD: ${PG_PASSWORD:?set PG_PASSWORD first}
+      CONNECT_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_SASL_MECHANISM: PLAIN
+      CONNECT_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="${EH_CONN:?set EH_CONN first}";'
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="${EH_CONN:?set EH_CONN first}";'
+      CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: "false"
+      CONNECT_ADMIN_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_ADMIN_SASL_MECHANISM: PLAIN
+      CONNECT_ADMIN_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="${EH_CONN:?set EH_CONN first}";'
