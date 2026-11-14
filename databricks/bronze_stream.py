@@ -16,7 +16,7 @@ SECRET_KEY = "eventhubs-connection-string"
 
 BRONZE_ROOT = f"abfss://bronze@{STORAGE_ACCOUNT}.dfs.core.windows.net"
 BRONZE_PATH = f"{BRONZE_ROOT}/events"
-CHECKPOINT_PATH = f"{BRONZE_ROOT}/_checkpoints/events_v2"
+CHECKPOINT_PATH = f"{BRONZE_ROOT}/_checkpoints/events_v6"
 
 # COMMAND ----------
 
@@ -37,7 +37,7 @@ raw = (
     .option("subscribe", TOPICS)
     .option("startingOffsets", "earliest")
     .option("includeHeaders", "true")
-    .option("includeHeaders", "true")
+    .option("failOnDataLoss", "false")
     .option("maxOffsetsPerTrigger", 100)
     .load()
 )
