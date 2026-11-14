@@ -10,13 +10,13 @@
 
 NAMESPACE = "evhns-urbanpulse-dev-sn095"
 STORAGE_ACCOUNT = "urbanpulsedevsn095"
-TOPICS = "trips,gps,payments"
+TOPICS = "trips,gps,payments,cdc"
 SECRET_SCOPE = "urbanpulse"
 SECRET_KEY = "eventhubs-connection-string"
 
 BRONZE_ROOT = f"abfss://bronze@{STORAGE_ACCOUNT}.dfs.core.windows.net"
 BRONZE_PATH = f"{BRONZE_ROOT}/events"
-CHECKPOINT_PATH = f"{BRONZE_ROOT}/_checkpoints/events"
+CHECKPOINT_PATH = f"{BRONZE_ROOT}/_checkpoints/events_v2"
 
 # COMMAND ----------
 
