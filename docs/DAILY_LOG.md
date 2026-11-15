@@ -92,3 +92,5 @@
 
 **Evidence**
 - `docs/cdc-day12-evidence.txt`, `docs/cdc-day13-drill-evidence.txt`, `docs/evidence/day-13/`
+
+Teardown (2026-11-15): Event Hubs namespace and 5 hubs destroyed (7 resources), Databricks cluster terminated, containers stopped (data kept). Bronze holds 3,736 rows.
