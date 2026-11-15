@@ -69,3 +69,26 @@
 **Broke:** The dry run before the real send showed 11,386 events for the default settings and the max-events guard refused, then --ticks 500 gave 250,000 events because --ticks scales GPS volume linearly; the dry run with --trips 100 --ticks 2 gave 1,474. The stop was done with a clean stream.stop(), so a hard stop in the middle of a batch was not tested. Event Hubs keeps messages for 1 day, so the whole test was done in one sitting.
 **Learned:** A checkpoint makes a restarted stream continue from the last committed batch; a micro-batch is committed as a unit, so a stop never leaves half a batch in Delta; reconciling the source count against Bronze rows and distinct offsets proves no loss and no duplicates; throttling the source with maxOffsetsPerTrigger makes a mid-run stop testable; destroying the hourly-billed resource first limits cost if a teardown fails halfway.
 **Evidence:** docs/bronze-restart-test.md, docs/evidence/day-11/01-partial-count-after-stop.png, 02-final-counts-after-restart.png, 03-no-duplicates-check.png. Cost Management check for Days 10 and 11 is pending until the figures arrive.
+
+## Days 12-13 (2026-11-09 to 2026-11-15): CDC with Debezium
+
+**Built**
+- Local PostgreSQL 16 (`wal_level=logical`) and Kafka Connect with Debezium 3.2 in Docker, streaming changes from `drivers`, `riders` and `promo_codes` into the single `cdc` event hub (topic reroute, ADR-002). Seeded 500 drivers, 1,000 riders, 20 promo codes.
+- Verified create, update and delete events (`op` c, u, d) in Event Hubs (1,523 events on Day 12).
+- Landed the `cdc` topic in Bronze. Reconciled: `cdc` = 1,525 rows, total 3,736 rows, and distinct (topic, partition, offset) equals the row count (no duplicates).
+- Failure drill: stopped Debezium, updated 3 rows, restarted. The changes caught up from the replication slot with nothing re-sent by hand. Slot lag was 28 kB while Debezium was down.
+- SCD2 on the captured driver events: 7 versions (3 current, 4 closed). Each of DRV-0001, DRV-0002 and DRV-0003 shows its old `idle` and new `busy` version, and DRV-9001 is closed by its delete.
+
+**Broke**
+- Azure PostgreSQL Flexible Server failed with `SkuNotAvailable` in Central India, so I switched to the local Docker fallback from the plan.
+- The Databricks notebook copy still had the old topic list and checkpoint, and no `startingOffsets` (Spark defaults to `latest`), so the first runs skipped the events. Fixed with `earliest` and fresh checkpoints.
+- One create event (DRV-0002) never reached Bronze. The hub's 1-day retention most likely expired it before it was landed (not proven). In the SCD2 demo its first version is rebuilt from the `before` image of its update and marked "(rebuilt)".
+
+**Learned**
+- Land data before retention expires: Bronze is the durable copy and Event Hubs only holds events temporarily.
+- Verify at the sink: progress logs said "caught up" while Bronze had no new rows.
+- A replication slot keeps changes safe while the connector is down.
+- SCD2 history must use event time (`source.ts_ms`), not processing time.
+
+**Evidence**
+- `docs/cdc-day12-evidence.txt`, `docs/cdc-day13-drill-evidence.txt`, `docs/evidence/day-13/`
