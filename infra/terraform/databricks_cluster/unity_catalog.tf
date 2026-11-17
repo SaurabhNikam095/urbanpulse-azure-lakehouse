@@ -13,3 +13,10 @@ resource "databricks_external_location" "bronze" {
   credential_name = databricks_storage_credential.adls.name
   comment         = "Bronze Delta tables and streaming checkpoints"
 }
+
+resource "databricks_external_location" "silver" {
+  name            = "urbanpulse-silver"
+  url             = "abfss://silver@${var.storage_account_name}.dfs.core.windows.net/"
+  credential_name = databricks_storage_credential.adls.name
+  comment         = "Silver Delta tables, late arrivals and quarantine"
+}
