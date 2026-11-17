@@ -94,3 +94,34 @@
 - `docs/cdc-day12-evidence.txt`, `docs/cdc-day13-drill-evidence.txt`, `docs/evidence/day-13/`
 
 Teardown (2026-11-15): Event Hubs namespace and 5 hubs destroyed (7 resources), Databricks cluster terminated, containers stopped (data kept). Bronze holds 3,736 rows.
+
+
+## Days 14-15 (2026-11-17): Silver at scale
+
+**Built**
+- Day 14: git hygiene check passed (clean tree, no state, plan or env files tracked, tfstate ignored, secret scan done, tag v0.1.0 present). ADR-005 and the week 2 summary PDF were not done: skipped to save time, the PDF comes later.
+- DRV-0002 check on Bronze `cdc` (3,736 rows in total, `cdc` = 1,525): creates are drivers 500, riders 1,000, promo_codes 20 = 1,520, plus 3 driver updates, 1 driver delete and 1 promo update = 1,525. DRV-0002's create event is absent (only its update landed). DRV-9001 is an extra create outside the seeded range, so the expected 1,519 was a miscount and 1,520 is correct.
+- Terraform: new Unity Catalog external location `urbanpulse-silver` (plan and apply: 1 added, 0 changed, 0 destroyed), same credential as bronze. Created `pii-salt` in the Databricks secret scope without printing it.
+- Silver (Databricks notebook, bounded run, reads Bronze only): decodes the Avro payloads with the schemas, validates ranges, dedupes on the ADR-002 keys, applies the 300 s watermark, hashes the payments phone and writes Delta tables to the silver container (trips, gps, payments, late_arrivals, quarantine). Reconciliation, Bronze = silver + late + quarantine + duplicates, holds for all three topics:
+  - trips 575 = 220 + 171 + 0 + 184
+  - gps 1,505 = 1,471 + 18 + 0 + 16
+  - payments 131 = 59 + 23 + 0 + 49
+  - quarantine is 0 on this data (rules not exercised on Databricks); `phone_hash` replaces the raw phone
+
+**Broke**
+- The first Silver write failed with an `fs.azure.account.key` error: only bronze had an external location. Fixed with the Terraform change above, with no storage key used.
+- Terraform needed its `TF_VAR_*` variables and `az login` again (lost when the terminal closed). The notebook's Python session also reset once and lost its variables.
+- Duplicate rates were about 32% (trips) and 37% (payments) against the 2% in ADR-002. Cause: Bronze holds two simulator runs landed on 09/11 (05:16 and 11:12-11:17) that reuse trip and payment IDs, so the dedupe key treats different events as duplicates. I did not check the simulator's run history. Decision: keep Silver as ADR-002 defines it. The duplicate and late counts are not the chaos rates.
+
+**Learned**
+- A reconciliation that balances proves nothing is lost or double counted, but not that the counts mean what you expect: compare them with the design.
+- Business keys can repeat across runs, so deduping on them needs a run or batch ID.
+- Unity Catalog needs an external location per container, and the account key is never the answer.
+- A fixed random seed makes runs repeat the same IDs.
+
+**Status (honest)**
+- DRV-0002's create event is missing from Bronze and the cause is unknown: the retention idea from Day 13 is not proven. Everything else in `cdc` reconciles.
+- Bounded runs only: no always-on stream and no latency numbers were measured.
+- Still open from ADR-002: the job that reprocesses `late_arrivals`, and a bounded state size.
+
+**Evidence:** `docs/evidence/day-15/01-silver-reconciliation.png`, `infra/terraform/databricks_cluster/unity_catalog.tf`.
