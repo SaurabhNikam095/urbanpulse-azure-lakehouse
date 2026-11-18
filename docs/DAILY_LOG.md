@@ -70,7 +70,7 @@
 **Learned:** A checkpoint makes a restarted stream continue from the last committed batch; a micro-batch is committed as a unit, so a stop never leaves half a batch in Delta; reconciling the source count against Bronze rows and distinct offsets proves no loss and no duplicates; throttling the source with maxOffsetsPerTrigger makes a mid-run stop testable; destroying the hourly-billed resource first limits cost if a teardown fails halfway.
 **Evidence:** docs/bronze-restart-test.md, docs/evidence/day-11/01-partial-count-after-stop.png, 02-final-counts-after-restart.png, 03-no-duplicates-check.png. Cost Management check for Days 10 and 11 is pending until the figures arrive.
 
-## Days 12-13 (2026-11-09 to 2026-11-15): CDC with Debezium
+## Days 12-13 : CDC with Debezium
 
 **Built**
 - Local PostgreSQL 16 (`wal_level=logical`) and Kafka Connect with Debezium 3.2 in Docker, streaming changes from `drivers`, `riders` and `promo_codes` into the single `cdc` event hub (topic reroute, ADR-002). Seeded 500 drivers, 1,000 riders, 20 promo codes.
@@ -96,7 +96,7 @@
 Teardown (2026-11-15): Event Hubs namespace and 5 hubs destroyed (7 resources), Databricks cluster terminated, containers stopped (data kept). Bronze holds 3,736 rows.
 
 
-## Days 14-15 (2026-11-17): Silver at scale
+## Days 14-15 : Silver at scale
 
 **Built**
 - Day 14: git hygiene check passed (clean tree, no state, plan or env files tracked, tfstate ignored, secret scan done, tag v0.1.0 present). ADR-005 and the week 2 summary PDF were not done: skipped to save time, the PDF comes later.
@@ -125,3 +125,26 @@ Teardown (2026-11-15): Event Hubs namespace and 5 hubs destroyed (7 resources), 
 - Still open from ADR-002: the job that reprocesses `late_arrivals`, and a bounded state size.
 
 **Evidence:** `docs/evidence/day-15/01-silver-reconciliation.png`, `databricks/silver_batch.py`, `infra/terraform/databricks_cluster/unity_catalog.tf`.
+
+## Days 16 : Silver at scale
+
+**Built**
+- Run-prefixed IDs in the simulators (`simulators/run_id.py`): `TRP-<run>-00000001` and `PAY-<run>-00000001`, so two simulator runs never reuse a trip or payment ID. Tests added. This affects new data only; old Bronze data keeps its colliding IDs.
+- Re-ran `databricks/silver_batch.py` on the cluster from the repo file. Counts are identical to the notebook run and conserved: trips 575 = 220+171+0+184, gps 1,505 = 1,471+18+0+16, payments 131 = 59+23+0+49.
+- Silver SCD2 dimensions (`databricks/silver_scd2.py`): decoded the Debezium JSON events from Bronze, hashed phone and email (HMAC-SHA256, salt from the `urbanpulse` secret scope), computed `row_hash`, and wrote `dim_driver` and `dim_rider` with Delta MERGE.
+- Results: `dim_driver` has 504 versions (500 current, 4 closed) and `dim_rider` has 1,000 versions (all current). Reconciliation for drivers: 504 events + 1 rebuilt = 0 no-change + 1 delete + 504 versions. There are 0 overlapping validity windows, no key with more than one current row, and no raw phone or email column.
+- Demo: DRV-0001 shows `idle` closing at 2026-11-13 15:52:05.273 and `busy` opening at the same instant, with the same `phone_hash` in both versions.
+
+**Broke**
+- `ruff` failed on `silver_batch.py` with 25 errors, because Databricks injects `spark` and `dbutils` and the notebook has imports in later cells. Fixed with a per-file ignore for `databricks/*.py` in `pyproject.toml`; the notebook itself was not changed.
+- `NameError: run_id`: the body used `run_id` but the `__init__` signature did not declare it. Fixed by adding the parameter to both simulators.
+- One driver's create event is missing from Bronze (the DRV-0002 open item, cause still unproven). Its first version is rebuilt from the `before` image of its first update and flagged `rebuilt_create`.
+
+**Learned**
+- A reconciliation must sum every output bucket: 505 events = 0 no-change + 1 delete + 504 versions written, so no CDC event disappears silently.
+- Debezium events in Bronze are plain JSON, so the envelope (`op`, `before`, `after`, `source`) is decoded first and the row inside second.
+- A delete is a tombstone: it closes the current version's validity window and adds no new version.
+- Unique run-prefixed IDs are what make dedupe by business key safe.
+
+**Evidence**
+- `docs/evidence/day-16/` (reconciliation table and DRV-0001 history)
