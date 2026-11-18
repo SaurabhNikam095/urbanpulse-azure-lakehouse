@@ -124,4 +124,4 @@ Teardown (2026-11-15): Event Hubs namespace and 5 hubs destroyed (7 resources), 
 - Bounded runs only: no always-on stream and no latency numbers were measured.
 - Still open from ADR-002: the job that reprocesses `late_arrivals`, and a bounded state size.
 
-**Evidence:** `docs/evidence/day-15/01-silver-reconciliation.png`, `infra/terraform/databricks_cluster/unity_catalog.tf`.
+**Evidence:** `docs/evidence/day-15/01-silver-reconciliation.png`, `databricks/silver_batch.py`, `infra/terraform/databricks_cluster/unity_catalog.tf`.

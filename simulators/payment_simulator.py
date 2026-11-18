@@ -11,6 +11,7 @@ from collections.abc import Iterable
 from datetime import timedelta
 
 from simulators.models import EventType, PaymentEvent, PaymentMethod, PaymentStatus, TripEvent
+from simulators.run_id import get_run_id, make_id
 
 DEFAULT_METHOD_WEIGHTS = {
     PaymentMethod.UPI: 0.55,
@@ -28,6 +29,7 @@ class PaymentSimulator:
         seed: int | None = None,
         failure_rate: float = 0.04,
         method_weights: dict[PaymentMethod, float] | None = None,
+        run_id: str | None = None,
     ) -> None:
         """Create a simulator.
 
@@ -45,6 +47,7 @@ class PaymentSimulator:
         self._weights = list(weights.values())
         self._phones: dict[str, str] = {}
         self._counter = 0
+        self.run_id = get_run_id(run_id)
 
     def _phone_for(self, rider_id: str) -> str:
         """Return a stable synthetic Indian mobile number for a rider."""
@@ -69,7 +72,7 @@ class PaymentSimulator:
             paid_at = trip.event_ts + timedelta(seconds=self._rng.uniform(5, 90))
             payments.append(
                 PaymentEvent(
-                    payment_id=f"PAY-{self._counter:08d}",
+                    payment_id=make_id("PAY", self.run_id, self._counter),
                     trip_id=trip.trip_id,
                     rider_id=trip.rider_id,
                     method=method,

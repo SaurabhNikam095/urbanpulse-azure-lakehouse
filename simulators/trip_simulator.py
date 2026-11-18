@@ -14,6 +14,7 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 from simulators.models import EventType, TripEvent
+from simulators.run_id import get_run_id, make_id
 
 # Bounding box that roughly covers Pune city.
 LAT_RANGE = (18.43, 18.62)
@@ -54,6 +55,7 @@ class TripSimulator:
         num_riders: int = 5000,
         cancel_rate: float = 0.12,
         start_time: datetime | None = None,
+        run_id: str | None = None,
     ) -> None:
         """Create a simulator.
 
@@ -71,6 +73,7 @@ class TripSimulator:
         self._cancel_rate = cancel_rate
         self._clock = start_time or datetime.now(UTC)
         self._trip_counter = 0
+        self.run_id = get_run_id(run_id)
 
     def _random_point(self) -> tuple[float, float]:
         lat = round(self._rng.uniform(*LAT_RANGE), 6)
@@ -98,7 +101,7 @@ class TripSimulator:
 
         pickup, drop, distance = self._random_route()
         requested = TripEvent(
-            trip_id=f"TRP-{self._trip_counter:08d}",
+            trip_id=make_id("TRP", self.run_id, self._trip_counter),
             event_type=EventType.REQUESTED,
             rider_id=self._rng.choice(self._riders),
             driver_id=None,
