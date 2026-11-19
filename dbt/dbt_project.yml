@@ -1,0 +1,19 @@
+name: urbanpulse
+version: "0.1.0"
+config-version: 2
+profile: urbanpulse
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+vars:
+  storage_account: urbanpulsedevsn095
+  silver_schema: urbanpulse_silver
+
+models:
+  urbanpulse:
+    gold:
+      +materialized: table
+      +file_format: delta
+      +location_root: "abfss://gold@urbanpulsedevsn095.dfs.core.windows.net/"

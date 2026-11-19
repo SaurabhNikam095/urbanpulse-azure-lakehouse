@@ -1,0 +1,12 @@
+# No secrets here: host, http path and token come from environment variables.
+urbanpulse:
+  target: dev
+  outputs:
+    dev:
+      type: databricks
+      catalog: dbw_urbanpulse_dev_sn095
+      schema: urbanpulse_gold
+      host: "{{ env_var('DATABRICKS_HOST') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      threads: 1

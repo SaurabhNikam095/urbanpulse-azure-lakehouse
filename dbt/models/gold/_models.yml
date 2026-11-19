@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: dim_driver
+    description: Driver SCD Type 2 history (one row per version). Join facts point-in-time.
+    columns:
+      - name: driver_sk
+        data_tests: [unique, not_null]
+      - name: driver_id
+        data_tests: [not_null]
+
+  - name: dim_rider
+    description: Current version of each rider.
+    columns:
+      - name: rider_id
+        data_tests: [unique, not_null]
+
+  - name: dim_zone
+    description: 0.01 degree grid zones (about 1 km) from pickup and drop points.
+    columns:
+      - name: zone_id
+        data_tests: [unique, not_null]
+
+  - name: dim_time
+    description: One row per hour across the event range.
+    columns:
+      - name: time_key
+        data_tests: [unique, not_null]
+
+  - name: fact_trips
+    description: One row per trip. Status is completed, cancelled or open.
+    columns:
+      - name: trip_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - accepted_values:
+              values: ["completed", "cancelled", "open"]
+      - name: rider_id
+        data_tests:
+          - relationships:
+              to: ref('dim_rider')
+              field: rider_id
+      - name: driver_sk
+        data_tests:
+          - relationships:
+              to: ref('dim_driver')
+              field: driver_sk
+      - name: pickup_zone_id
+        data_tests:
+          - relationships:
+              to: ref('dim_zone')
+              field: zone_id
+      - name: time_key
+        data_tests:
+          - relationships:
+              to: ref('dim_time')
+              field: time_key
+
+  - name: fact_payments
+    description: One row per payment.
+    columns:
+      - name: payment_id
+        data_tests: [unique, not_null]
+      - name: amount
+        data_tests: [not_null]
+      - name: method
+        data_tests:
+          - accepted_values:
+              values: ["CASH", "CARD", "UPI", "WALLET"]
+      - name: status
+        data_tests:
+          - accepted_values:
+              values: ["SUCCESS", "FAILED"]
+      - name: time_key
+        data_tests:
+          - relationships:
+              to: ref('dim_time')
+              field: time_key
+      - name: trip_id
+        description: A payment can point to a trip that is not in Silver trips yet (late arrival).
+        data_tests:
+          - relationships:
+              to: ref('fact_trips')
+              field: trip_id
+              config:
+                severity: warn
+
+  - name: mart_daily_revenue
+    description: Daily trips, cancellation rate and revenue.
+    columns:
+      - name: report_date
+        data_tests: [unique, not_null]

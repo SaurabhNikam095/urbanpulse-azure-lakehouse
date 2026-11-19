@@ -20,3 +20,10 @@ resource "databricks_external_location" "silver" {
   credential_name = databricks_storage_credential.adls.name
   comment         = "Silver Delta tables, late arrivals and quarantine"
 }
+
+resource "databricks_external_location" "gold" {
+  name            = "urbanpulse-gold"
+  url             = "abfss://gold@${var.storage_account_name}.dfs.core.windows.net/"
+  credential_name = databricks_storage_credential.adls.name
+  comment         = "Gold Delta tables built by dbt"
+}

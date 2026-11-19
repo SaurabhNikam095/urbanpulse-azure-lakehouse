@@ -1,0 +1,15 @@
+version: 2
+
+exposures:
+  - name: daily_revenue_dashboard
+    type: dashboard
+    maturity: low
+    owner:
+      name: Saurabh Nikam
+    description: >
+      Power BI dashboard for daily revenue and cancellation rate, built after the Azure window
+      from exported Gold files.
+    depends_on:
+      - ref('mart_daily_revenue')
+      - ref('fact_trips')
+      - ref('fact_payments')

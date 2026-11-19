@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: silver
+    database: dbw_urbanpulse_dev_sn095
+    schema: urbanpulse_silver
+    description: Silver Delta tables, registered by `dbt run-operation register_silver`.
+    tables:
+      - name: trips
+        columns:
+          - name: trip_id
+            data_tests: [not_null]
+      - name: payments
+        columns:
+          - name: payment_id
+            data_tests: [not_null]
+      - name: dim_driver
+      - name: dim_rider
