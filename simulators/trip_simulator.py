@@ -52,7 +52,7 @@ class TripSimulator:
         self,
         seed: int | None = None,
         num_drivers: int = 500,
-        num_riders: int = 5000,
+        num_riders: int = 1000,
         cancel_rate: float = 0.12,
         start_time: datetime | None = None,
         run_id: str | None = None,
